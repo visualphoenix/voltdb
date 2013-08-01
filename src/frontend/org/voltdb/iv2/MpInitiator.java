@@ -111,7 +111,12 @@ public class MpInitiator extends BaseInitiator implements Promotable
                     m_initiatorMailbox.setLeaderState(result.getSecond());
                     List<Iv2InitiateTaskMessage> restartTxns = ((MpPromoteAlgo)repair).getInterruptedTxns();
                     if (!restartTxns.isEmpty()) {
+                        tmLog.debug(m_whoami + " saw restart txns: " + restartTxns.size());
+                        for (Iv2InitiateTaskMessage msg : restartTxns) {
+                            tmLog.debug(m_whoami + " restart candidate: " + msg);
+                        }
                         // Should only be one restarting MP txn
+                        tmLog.debug(m_whoami + " restarting txn: " + restartTxns.get(0));
                         m_initiatorMailbox.repairReplicasWith(null, restartTxns.get(0));
                     }
                     tmLog.info(m_whoami

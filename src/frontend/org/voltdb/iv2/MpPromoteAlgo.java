@@ -218,7 +218,9 @@ public class MpPromoteAlgo implements RepairAlgo
             // completed, so this has the effect of making sure that any holes
             // in the repair log are filled without explicitly having to
             // discover and track them.
-            tmLog.debug(m_whoami + "repairing: " + m_survivors + " with: " + TxnEgo.txnIdToString(li.getTxnId()));
+            VoltMessage repairmsg = createRepairMessage(li);
+            tmLog.debug(m_whoami + "repairing: " + m_survivors + " with: " + TxnEgo.txnIdToString(li.getTxnId()) +
+                    ", message: " + repairmsg);
             m_mailbox.repairReplicasWith(m_survivors, createRepairMessage(li));
         }
 

@@ -30,9 +30,11 @@ import org.voltdb.messaging.FragmentTaskMessage;
 
 public class TransactionTaskQueue
 {
-    protected static final VoltLogger hostLog = new VoltLogger("HOST");
+    protected static final VoltLogger tmLog = new VoltLogger("TM");
 
     final private SiteTaskerQueue m_taskQueue;
+    long m_lastSpTxnId = Long.MIN_VALUE;
+    long m_lastMpTxnId = Long.MIN_VALUE;
 
     /*
      * Multi-part transactions create a backlog of tasks behind them. A queue is
@@ -56,6 +58,20 @@ public class TransactionTaskQueue
     synchronized boolean offer(TransactionTask task)
     {
         Iv2Trace.logTransactionTaskQueueOffer(task);
+        if (task.getTransactionState().isSinglePartition()) {
+            if (task.getTxnId() < m_lastSpTxnId) {
+                tmLog.warn("SP Transaction IDs going backwards.  Current: " + m_lastSpTxnId + ", new msg: " +
+                        task.getTransactionState().getNotice());
+            }
+            m_lastSpTxnId = task.getTxnId();
+        }
+        else {
+            if (task.getTxnId() < m_lastMpTxnId) {
+                tmLog.warn("MP Transaction IDs going backwards.  Current: " + m_lastMpTxnId + ", new msg: " +
+                        task.getTransactionState().getNotice());
+            }
+            m_lastMpTxnId = task.getTxnId();
+        }
         boolean retval = false;
         if (!m_backlog.isEmpty()) {
             /*
