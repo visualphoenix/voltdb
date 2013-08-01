@@ -58,20 +58,20 @@ public class TransactionTaskQueue
     synchronized boolean offer(TransactionTask task)
     {
         Iv2Trace.logTransactionTaskQueueOffer(task);
-        //if (task.getTransactionState().isSinglePartition()) {
+        if (task.getTransactionState().isSinglePartition()) {
         //    if (task.getTxnId() < m_lastSpTxnId) {
         //        tmLog.warn("SP Transaction IDs going backwards.  Current: " + m_lastSpTxnId + ", new msg: " +
         //                task.getTransactionState().getNotice());
         //    }
         //    m_lastSpTxnId = task.getTxnId();
-        //}
-        //else {
-        //    if (task.getTxnId() < m_lastMpTxnId) {
-        //        tmLog.warn("MP Transaction IDs going backwards.  Current: " + m_lastMpTxnId + ", new msg: " +
-        //                task.getTransactionState().getNotice());
-        //    }
-        //    m_lastMpTxnId = task.getTxnId();
-        //}
+        }
+        else {
+            if (task.getTxnId() < m_lastMpTxnId) {
+                tmLog.warn("MP Transaction IDs going backwards.  Current: " + m_lastMpTxnId + ", new msg: " +
+                        task.getTransactionState().getNotice());
+            }
+            m_lastMpTxnId = task.getTxnId();
+        }
         boolean retval = false;
         if (!m_backlog.isEmpty()) {
             /*
