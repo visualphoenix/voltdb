@@ -221,7 +221,7 @@ public class MpPromoteAlgo implements RepairAlgo
             VoltMessage repairmsg = createRepairMessage(li);
             tmLog.debug(m_whoami + "repairing: " + m_survivors + " with: " + TxnEgo.txnIdToString(li.getTxnId()) +
                     ", message: " + repairmsg);
-            m_mailbox.repairReplicasWith(m_survivors, createRepairMessage(li));
+            m_mailbox.repairReplicasWith(m_survivors, repairmsg);
         }
 
         m_promotionResult.done(m_maxSeenTxnId);
