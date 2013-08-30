@@ -9,6 +9,7 @@ ascommithook = False
 
 prunelist = ('hsqldb19b3',
              'hsqldb',
+             'jenkins-scripts',
              'jetty716',
              'proj_gen',
              'jni_md.h',
