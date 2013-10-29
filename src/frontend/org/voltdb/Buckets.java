@@ -36,7 +36,6 @@ public class Buckets {
     public Buckets(int partitionCount, int tokenCount) {
         Preconditions.checkArgument(partitionCount > 0);
         Preconditions.checkArgument(tokenCount > partitionCount);
-        Preconditions.checkArgument(tokenCount % 2 == 0);
         m_tokenCount = tokenCount;
         m_tokenInterval = calculateTokenInterval(tokenCount);
         m_partitionTokens.add(Sets.<Integer>newTreeSet());
@@ -75,13 +74,12 @@ public class Buckets {
     }
 
     private static long calculateTokenInterval(int bucketCount) {
-        return Integer.MAX_VALUE / (bucketCount / 2);
+        return (int)(Integer.MAX_VALUE / (bucketCount / (double)2));
     }
 
     public Buckets(SortedMap<Integer, Integer> tokens) {
         Preconditions.checkNotNull(tokens);
         Preconditions.checkArgument(tokens.size() > 1);
-        Preconditions.checkArgument(tokens.size() % 2 == 0);
         m_tokenCount = tokens.size();
         m_tokenInterval = calculateTokenInterval(m_tokenCount);
 
@@ -120,7 +118,19 @@ public class Buckets {
             if (mostLoaded.tokens.size() == leastLoaded.tokens.size()) return false;
             //Can't improve on off by one, just end up off by one again
             if (mostLoaded.tokens.size() == (leastLoaded.tokens.size() + 1)) return false;
-            int token = mostLoaded.tokens.pollFirst();
+
+            //Pseudo-randomly select a token from mostLoaded to move
+            Random r = new Random(mostLoaded.tokens.size());
+            int index = r.nextInt(mostLoaded.tokens.size());
+            int count = 0;
+            int token = 0;
+            Iterator<Integer> iter = mostLoaded.tokens.iterator();
+            do {
+               token = iter.next();
+               count++;
+            } while (count < index);
+            iter.remove();
+
             leastLoaded.tokens.add(token);
         } finally {
             loadSet.add(mostLoaded);

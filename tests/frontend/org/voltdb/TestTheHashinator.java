@@ -60,7 +60,7 @@ public class TestTheHashinator {
 
     @Before
     public void setUp() {
-        ElasticHashinator.DEFAULT_TOTAL_TOKENS = 1024;
+        ElasticHashinator.DEFAULT_TOTAL_TOKENS = 1026;
         EELibraryLoader.loadExecutionEngineLibrary(true);
         VoltDB.instance().readBuildInfo("Test");
     }
@@ -128,15 +128,15 @@ public class TestTheHashinator {
         }
     }
 
-    private static Map<Integer, Integer> getRangesAndCheck(int partitionCount, int partitionToCheck)
+    private static Map<Integer, Integer> getRangesAndCheck(int tokenCount, int partitionCount, int partitionToCheck)
     {
         ElasticHashinator hashinator =
             new ElasticHashinator(ElasticHashinator.getConfigureBytes(partitionCount,
-                                                                      ElasticHashinator.DEFAULT_TOTAL_TOKENS),
+                                                                      tokenCount),
                                                                       false);
         Map<Integer, Integer> range1 = hashinator.pGetRanges(partitionToCheck);
-        assertTrue(ElasticHashinator.DEFAULT_TOTAL_TOKENS / partitionCount == range1.size() ||
-                   1 + ElasticHashinator.DEFAULT_TOTAL_TOKENS / partitionCount == range1.size());
+        assertTrue(tokenCount / partitionCount == range1.size() ||
+                   1 + tokenCount / partitionCount == range1.size());
 
         // make sure that the returned map is sorted
         long previous = Integer.MIN_VALUE;
@@ -160,19 +160,19 @@ public class TestTheHashinator {
      * @param beforePartitionCount    Partition count before adding new partitions
      * @param afterPartitionCount     Partition count after adding new partitions
      */
-    private static void checkRangesAfterExpansion(int beforePartitionCount, int afterPartitionCount) {
+    private static void checkRangesAfterExpansion(int tokenCount, int beforePartitionCount, int afterPartitionCount) {
         for (int i = 0; i < beforePartitionCount; i++) {
-            Map<Integer, Integer> oldrange = getRangesAndCheck(beforePartitionCount, i);
-            Map<Integer, Integer> newrange = getRangesAndCheck(afterPartitionCount, i);
+            Map<Integer, Integer> oldrange = getRangesAndCheck(tokenCount, beforePartitionCount, i);
+            Map<Integer, Integer> newrange = getRangesAndCheck(tokenCount, afterPartitionCount, i);
 
             // Only compare the begin tokens, end tokens are determined by the successors
             assertTrue(oldrange.keySet().containsAll(newrange.keySet()));
             assertTrue(oldrange.keySet().size() > newrange.keySet().size());
             assertTrue(newrange.keySet().size() > 0);
-            assertTrue(oldrange.size() == ElasticHashinator.DEFAULT_TOTAL_TOKENS / beforePartitionCount ||
-                       oldrange.size() == 1 + ElasticHashinator.DEFAULT_TOTAL_TOKENS / beforePartitionCount);
-            assertTrue(newrange.size() == ElasticHashinator.DEFAULT_TOTAL_TOKENS / afterPartitionCount ||
-                       newrange.size() == 1 + ElasticHashinator.DEFAULT_TOTAL_TOKENS / afterPartitionCount);
+            assertTrue(oldrange.size() == tokenCount / beforePartitionCount ||
+                       oldrange.size() == 1 + tokenCount / beforePartitionCount);
+            assertTrue(newrange.size() == tokenCount / afterPartitionCount ||
+                       newrange.size() == 1 + tokenCount / afterPartitionCount);
         }
     }
 
@@ -201,7 +201,7 @@ public class TestTheHashinator {
                         100,
                         config);
 
-        long valueToHash = hashinatorType == HashinatorType.ELASTIC ? 39: 2;
+        long valueToHash = hashinatorType == HashinatorType.ELASTIC ? 40: 2;
 
         int eehash = ee.hashinate(valueToHash, config);
         int javahash = TheHashinator.getPartitionForParameter(VoltType.typeFromObject(valueToHash).getValue(),
@@ -708,8 +708,8 @@ public class TestTheHashinator {
     public void testElasticGetRanges() {
         if (hashinatorType == HashinatorType.LEGACY) return;
 
-        getRangesAndCheck(/* partitionCount = */ 2,  /* partitionToCheck = */ 1);
-        getRangesAndCheck(/* partitionCount = */ 24, /* partitionToCheck = */ 15);
+        getRangesAndCheck( 1024, /* partitionCount = */ 2,  /* partitionToCheck = */ 1);
+        getRangesAndCheck( 1024, /* partitionCount = */ 24, /* partitionToCheck = */ 15);
     }
 
     @Test
@@ -717,9 +717,9 @@ public class TestTheHashinator {
     {
         if (hashinatorType == HashinatorType.LEGACY) return;
 
-        checkRangesAfterExpansion(/* beforePartitionCount = */ 2, /* afterPartitionCount = */ 6);
-        checkRangesAfterExpansion(/* beforePartitionCount = */ 21, /* afterPartitionCount = */ 28);
-        checkRangesAfterExpansion(/* beforePartitionCount = */ 24, /* afterPartitionCount = */ 48);
+        checkRangesAfterExpansion( 1026, /* beforePartitionCount = */ 2, /* afterPartitionCount = */ 6);
+        checkRangesAfterExpansion( 1092, /* beforePartitionCount = */ 21, /* afterPartitionCount = */ 28);
+        checkRangesAfterExpansion( 1056, /* beforePartitionCount = */ 24, /* afterPartitionCount = */ 48);
     }
 
     @Test

@@ -187,9 +187,15 @@ public class ElasticHashinator extends TheHashinator {
     public static byte[] getConfigureBytes(int partitionCount, int tokenCount) {
         Preconditions.checkArgument(partitionCount > 0);
         Preconditions.checkArgument(tokenCount > partitionCount);
+
+        /*
+         * Bump the token count so we at least start with a perfect distribution
+         */
+        int originalTokenCount = tokenCount;
         while (tokenCount % partitionCount != 0) {
             tokenCount++;
         }
+
         Buckets buckets = new Buckets(partitionCount, tokenCount);
         ElasticHashinator hashinator = new ElasticHashinator(buckets.getTokens());
         return hashinator.getConfigBytes();
