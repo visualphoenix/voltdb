@@ -201,7 +201,7 @@ public class TestTheHashinator {
                         100,
                         config);
 
-        long valueToHash = hashinatorType == HashinatorType.ELASTIC ? 40: 2;
+        long valueToHash = hashinatorType == HashinatorType.ELASTIC ? 39: 2;
 
         int eehash = ee.hashinate(valueToHash, config);
         int javahash = TheHashinator.getPartitionForParameter(VoltType.typeFromObject(valueToHash).getValue(),
