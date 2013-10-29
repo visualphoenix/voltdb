@@ -119,18 +119,7 @@ public class Buckets {
             //Can't improve on off by one, just end up off by one again
             if (mostLoaded.tokens.size() == (leastLoaded.tokens.size() + 1)) return false;
 
-            //Pseudo-randomly select a token from mostLoaded to move
-            Random r = new Random(mostLoaded.tokens.size());
-            int index = r.nextInt(mostLoaded.tokens.size());
-            int count = 0;
-            int token = 0;
-            Iterator<Integer> iter = mostLoaded.tokens.iterator();
-            do {
-               token = iter.next();
-               count++;
-            } while (count < index);
-            iter.remove();
-
+            int token = mostLoaded.tokens.pollFirst();
             leastLoaded.tokens.add(token);
         } finally {
             loadSet.add(mostLoaded);
